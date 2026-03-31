@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>QuickNotes</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f0f0f;--bg2:#161616;--bg3:#1e1e1e;
+  --bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.13);
+  --tx:#dedad4;--mu:#555;--mu2:#888;
+  --ac:#a3e635;--acb:rgba(163,230,53,0.09);
+  --dg:#f87171;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','Fira Mono',monospace;
+}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--sans);}
+#app{height:100vh;display:flex;flex-direction:column;}
+.aw{flex:1;display:flex;align-items:center;justify-content:center;}
+.ac{width:290px;}
+.abrand{margin-bottom:24px;}
+.abrand h1{font-size:19px;font-weight:600;color:var(--tx);letter-spacing:-.5px;}
+.abrand p{font-size:12px;color:var(--mu2);margin-top:2px;}
+.albl{font-size:10px;color:var(--mu2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+.ain{width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);font-family:var(--sans);font-size:13px;padding:8px 11px;border-radius:6px;outline:none;margin-bottom:12px;transition:border-color .15s;}
+.ain:focus{border-color:var(--ac);}
+.ain::placeholder{color:var(--mu);}
+.abtn{width:100%;padding:9px;background:var(--ac);color:#000;font-family:var(--sans);font-size:13px;font-weight:600;border:none;border-radius:6px;cursor:pointer;}
+.abtn:hover{opacity:.87;}
+.aerr{font-size:12px;color:var(--dg);margin-bottom:8px;min-height:14px;}
+.aalt{font-size:11px;color:var(--mu2);text-align:center;margin-top:10px;}
+.aalt a{color:var(--ac);cursor:pointer;}
+.main{flex:1;display:flex;overflow:hidden;}
+.sb{width:230px;min-width:230px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;}
+.sbh{padding:11px 10px 9px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px;}
+.sbt{font-size:11px;font-weight:600;color:var(--mu2);text-transform:uppercase;letter-spacing:1px;flex:1;}
+.sbnew{background:var(--ac);color:#000;border:none;border-radius:4px;width:22px;height:22px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;}
+.sbnew:hover{opacity:.8;}
+.sbsearch{padding:7px 9px;border-bottom:1px solid var(--bd);}
+.sbsearch input{width:100%;background:var(--bg3);border:1px solid var(--bd);color:var(--tx);font-family:var(--sans);font-size:12px;padding:5px 8px;border-radius:4px;outline:none;}
+.sbsearch input::placeholder{color:var(--mu);}
+.sbsearch input:focus{border-color:var(--bd2);}
+.nl{flex:1;overflow-y:auto;padding:3px 0;}
+.nl::-webkit-scrollbar{width:3px;}
+.nl::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
+.nr{display:flex;align-items:center;padding:7px 8px 7px 5px;cursor:pointer;border-radius:5px;margin:1px 4px;gap:6px;user-select:none;border:1px solid transparent;transition:background .1s;}
+.nr:hover{background:var(--bg3);}
+.nr.active{background:var(--acb);}
+.nr.drag-over-top{border-top:2px solid var(--ac)!important;}
+.nr.drag-over-bot{border-bottom:2px solid var(--ac)!important;}
+.nr.dragging{opacity:.3;}
+.dh{color:var(--mu);font-size:13px;cursor:grab;opacity:0;flex-shrink:0;}
+.nr:hover .dh{opacity:1;}
+.cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.nrt{font-size:12px;color:var(--tx);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nrd{font-size:10px;color:var(--mu);flex-shrink:0;}
+.sbf{padding:9px 11px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.ul{font-size:11px;color:var(--mu2);}
+.ul b{color:var(--ac);font-weight:500;}
+.so{font-size:11px;color:var(--mu);background:none;border:none;cursor:pointer;font-family:var(--sans);}
+.so:hover{color:var(--dg);}
+.ew{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.eh{padding:9px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.nti{flex:1;background:none;border:none;color:var(--tx);font-family:var(--sans);font-size:16px;font-weight:600;outline:none;min-width:0;}
+.nti::placeholder{color:var(--mu);}
+.cpick{display:flex;gap:5px;align-items:center;flex-shrink:0;}
+.cpdot{width:14px;height:14px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s,border-color .1s;}
+.cpdot:hover{transform:scale(1.3);}
+.cpdot.sel{border-color:rgba(255,255,255,.75);}
+.delbtn{background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:3px;}
+.delbtn:hover{color:var(--dg);background:rgba(248,113,113,.1);}
+.tb{padding:5px 10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:1px;flex-wrap:wrap;background:var(--bg2);flex-shrink:0;}
+.tbtn{background:none;border:none;color:var(--mu2);cursor:pointer;padding:3px 8px;border-radius:4px;font-size:12px;font-family:var(--sans);line-height:1.3;transition:color .1s,background .1s;white-space:nowrap;}
+.tbtn:hover{color:var(--tx);background:var(--bg3);}
+.tbtn.on{color:var(--ac);background:var(--acb);}
+.tsep{width:1px;height:15px;background:var(--bd2);margin:0 3px;flex-shrink:0;}
+.eb{flex:1;overflow-y:auto;padding:18px 22px;outline:none;font-size:14px;line-height:1.85;color:var(--tx);background:var(--bg);}
+.eb::-webkit-scrollbar{width:4px;}
+.eb::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
+.eb:empty:before{content:attr(data-ph);color:rgba(255,255,255,.15);pointer-events:none;}
+.eb img{max-width:100%;border-radius:6px;margin:8px 0;display:block;border:1px solid var(--bd2);}
+.eb input[type=checkbox]{accent-color:var(--ac);margin-right:6px;cursor:pointer;width:14px;height:14px;}
+.eb label{display:flex;align-items:center;cursor:pointer;margin:2px 0;}
+.eb hr{border:none;border-top:1px solid var(--bd2);margin:14px 0;}
+.eb ul,.eb ol{padding-left:22px;}
+.nosel{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--mu);font-size:13px;}
+.nosel kbd{background:var(--bg3);border:1px solid var(--bd2);padding:2px 8px;border-radius:3px;font-size:11px;font-family:var(--mono);color:var(--mu2);}
+</style>
+</head>
+<body>
+<div id="app"><div style="flex:1;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mu);letter-spacing:2px;font-family:var(--mono)">loading…</div></div>
+<script>
+const COLORS={'':'#3a3a3a',r:'#f87171',o:'#fb923c',y:'#fbbf24',g:'#4ade80',b:'#60a5fa',p:'#c084fc'};
+const SZ={s:'2',m:'3',l:'5'};
+let S={mode:'loading',isReg:false,authErr:'',user:null,notes:[],activeId:null,search:'',dragId:null,dragOvId:null,dragBef:true};
+let saveTimer=null;
+
+function lg(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}}
+function ls(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){console.warn(e);}}
+function ld(k){try{localStorage.removeItem(k);}catch{}}
+async function sha(m){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(m));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function ago(t){const s=Math.floor((Date.now()-t)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d';}
+function stripHtml(h){const d=document.createElement('div');d.innerHTML=h;return d.textContent;}
+function persist(){if(S.user)ls('qn2:notes:'+S.user,S.notes);}
+
+function render(){
+  const app=document.getElementById('app');if(!app)return;
+  S.mode==='auth'?renderAuth(app):renderMain(app);
+}
+
+function renderAuth(app){
+  app.innerHTML=`<div class="aw"><div class="ac">
+    <div class="abrand"><h1>QuickNotes</h1><p>your notes, anywhere</p></div>
+    <div class="albl">Username</div>
+    <input class="ain" id="fu" type="text" placeholder="username" autocomplete="username"/>
+    <div class="albl">Password</div>
+    <input class="ain" id="fp" type="password" placeholder="••••••••" autocomplete="${S.isReg?'new-password':'current-password'}"/>
+    ${S.isReg?`<div class="albl">Confirm password</div><input class="ain" id="fp2" type="password" placeholder="••••••••"/>`:``}
+    <div class="aerr">${esc(S.authErr)}</div>
+    <button class="abtn" id="ago">${S.isReg?'Create account':'Sign in'}</button>
+    <div class="aalt">${S.isReg?'Have an account? <a id="atog">Sign in</a>':"No account? <a id='atog'>Register</a>"}</div>
+  </div></div>`;
+  document.getElementById('fu').focus();
+  document.getElementById('ago').onclick=doAuth;
+  document.getElementById('atog').onclick=()=>{S.isReg=!S.isReg;S.authErr='';render();};
+  document.getElementById('fp').onkeydown=e=>{if(e.key==='Enter')doAuth();};
+  const fp2=document.getElementById('fp2');
+  if(fp2)fp2.onkeydown=e=>{if(e.key==='Enter')doAuth();};
+}
+
+async function doAuth(){
+  const u=document.getElementById('fu').value.trim().toLowerCase();
+  const p=document.getElementById('fp').value;
+  if(!u||!p){S.authErr='Fill in all fields';render();return;}
+  const users=lg('qn:users')||{};
+  const hash=await sha(p+u+'qn_salt_2025');
+  if(S.isReg){
+    const p2=document.getElementById('fp2')?.value||'';
+    if(p!==p2){S.authErr='Passwords do not match';render();return;}
+    if(u.length<3){S.authErr='Username too short';render();return;}
+    if(users[u]){S.authErr='Username already taken';render();return;}
+    users[u]=hash;ls('qn:users',users);
+  }else{
+    if(!users[u]||users[u]!==hash){S.authErr='Invalid credentials';render();return;}
+  }
+  S.user=u;S.notes=lg('qn2:notes:'+u)||[];
+  S.activeId=S.notes.length?S.notes[0].id:null;
+  S.mode='main';S.authErr='';ls('qn2:session',u);render();
+}
+
+function renderMain(app){
+  const active=S.notes.find(n=>n.id===S.activeId);
+  const vis=S.search?S.notes.filter(n=>(n.title+' '+stripHtml(n.content||'')).toLowerCase().includes(S.search.toLowerCase())):S.notes;
+  const cpHtml=Object.entries(COLORS).map(([k,c])=>`<div class="cpdot${active&&active.color===k?' sel':''}" data-c="${k}" style="background:${c}"></div>`).join('');
+
+  app.innerHTML=`<div class="main">
+    <div class="sb">
+      <div class="sbh"><span class="sbt">Notes <span style="font-weight:400;color:var(--mu)">(${S.notes.length})</span></span><button class="sbnew" id="sbnew" title="New (Ctrl+N)">+</button></div>
+      <div class="sbsearch"><input id="sbq" placeholder="Search…" value="${esc(S.search)}"/></div>
+      <div class="nl" id="nl">
+        ${vis.length===0?`<div style="padding:20px 10px;font-size:12px;color:var(--mu);text-align:center">${S.search?'No results':'No notes — press + to start'}</div>`:
+          vis.map(n=>`<div class="nr${n.id===S.activeId?' active':''}" data-id="${n.id}" draggable="true">
+            <span class="dh">⠿</span>
+            <span class="cdot" style="background:${COLORS[n.color||'']||COLORS['']}"></span>
+            <span class="nrt">${esc(n.title||'Untitled')}</span>
+            <span class="nrd">${ago(n.updatedAt)}</span>
+          </div>`).join('')}
+      </div>
+      <div class="sbf"><span class="ul">@<b>${esc(S.user)}</b></span><button class="so" id="sout">sign out</button></div>
+    </div>
+    ${active?`<div class="ew">
+      <div class="eh" style="border-left:3px solid ${COLORS[active.color||'']||COLORS['']}">
+        <input class="nti" id="ntitle" value="${esc(active.title)}" placeholder="Untitled"/>
+        <div class="cpick">${cpHtml}</div>
+        <button class="delbtn" id="delbtn">✕</button>
+      </div>
+      <div class="tb">
+        <button class="tbtn" data-cmd="bold" onmousedown="event.preventDefault()"><b>B</b></button>
+        <button class="tbtn" data-cmd="italic" onmousedown="event.preventDefault()"><i>I</i></button>
+        <button class="tbtn" data-cmd="underline" onmousedown="event.preventDefault()"><u>U</u></button>
+        <button class="tbtn" data-cmd="strikeThrough" onmousedown="event.preventDefault()"><s>S</s></button>
+        <div class="tsep"></div>
+        <button class="tbtn" data-sz="s" onmousedown="event.preventDefault()" style="font-size:10px;font-weight:700">S</button>
+        <button class="tbtn" data-sz="m" onmousedown="event.preventDefault()" style="font-size:12px;font-weight:700">M</button>
+        <button class="tbtn" data-sz="l" onmousedown="event.preventDefault()" style="font-size:15px;font-weight:700">L</button>
+        <div class="tsep"></div>
+        <button class="tbtn" id="tb-cb" onmousedown="event.preventDefault()">☐ task</button>
+        <button class="tbtn" data-cmd="insertUnorderedList" onmousedown="event.preventDefault()">• list</button>
+        <button class="tbtn" data-cmd="insertOrderedList" onmousedown="event.preventDefault()">1. list</button>
+        <button class="tbtn" id="tb-hr" onmousedown="event.preventDefault()">— rule</button>
+        <div class="tsep"></div>
+        <span style="font-size:10px;color:var(--mu);padding:0 4px">Ctrl+V = paste image</span>
+      </div>
+      <div class="eb" id="eb" contenteditable="true" spellcheck="true" data-ph="Start typing…">${active.content||''}</div>
+    </div>`:`<div class="ew"><div class="nosel"><div>Select or create a note</div><div style="display:flex;gap:6px;margin-top:4px;align-items:center"><kbd>Ctrl+N</kbd><span style="font-size:11px">new note</span></div></div></div>`}
+  </div>`;
+
+  attachEvents(active);
+}
+
+function attachEvents(active){
+  document.getElementById('sbnew').onclick=newNote;
+  document.getElementById('sbq').oninput=e=>{S.search=e.target.value;render();};
+  document.getElementById('sout').onclick=()=>{saveContent();ld('qn2:session');S.user=null;S.notes=[];S.activeId=null;S.mode='auth';render();};
+
+  const nl=document.getElementById('nl');
+  if(nl){
+    nl.querySelectorAll('.nr').forEach(row=>{
+      row.onclick=()=>{saveContent();S.activeId=row.dataset.id;render();};
+      row.addEventListener('dragstart',e=>{S.dragId=row.dataset.id;e.dataTransfer.effectAllowed='move';setTimeout(()=>row.classList.add('dragging'),0);});
+      row.addEventListener('dragend',()=>{row.classList.remove('dragging');nl.querySelectorAll('.nr').forEach(r=>r.classList.remove('drag-over-top','drag-over-bot'));});
+      row.addEventListener('dragover',e=>{
+        e.preventDefault();if(row.dataset.id===S.dragId)return;
+        const rc=row.getBoundingClientRect();S.dragOvId=row.dataset.id;S.dragBef=e.clientY<rc.top+rc.height/2;
+        nl.querySelectorAll('.nr').forEach(r=>r.classList.remove('drag-over-top','drag-over-bot'));
+        row.classList.add(S.dragBef?'drag-over-top':'drag-over-bot');
+      });
+      row.addEventListener('drop',e=>{
+        e.preventDefault();
+        if(!S.dragId||!S.dragOvId||S.dragId===S.dragOvId){render();return;}
+        const fi=S.notes.findIndex(n=>n.id===S.dragId);
+        const[mv]=S.notes.splice(fi,1);
+        const ti=S.notes.findIndex(n=>n.id===S.dragOvId);
+        S.notes.splice(S.dragBef?ti:ti+1,0,mv);
+        S.dragId=null;S.dragOvId=null;persist();render();
+      });
+    });
+  }
+
+  if(!active)return;
+  const eb=document.getElementById('eb');
+  const ntitle=document.getElementById('ntitle');
+  ntitle.oninput=()=>schedSave();
+  eb.oninput=()=>schedSave();
+  eb.addEventListener('paste',handlePaste);
+  eb.addEventListener('keyup',updTb);
+  eb.addEventListener('mouseup',updTb);
+
+  document.querySelectorAll('[data-cmd]').forEach(btn=>{
+    btn.onclick=()=>{eb.focus();document.execCommand(btn.dataset.cmd,false,null);schedSave();updTb();};
+  });
+  document.querySelectorAll('[data-sz]').forEach(btn=>{
+    btn.onclick=()=>{eb.focus();document.execCommand('fontSize',false,SZ[btn.dataset.sz]);schedSave();};
+  });
+  document.getElementById('tb-cb').onclick=()=>{
+    eb.focus();
+    document.execCommand('insertHTML',false,`<label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:2px 0"><input type="checkbox"/><span>Task item</span></label>`);
+    schedSave();
+  };
+  document.getElementById('tb-hr').onclick=()=>{eb.focus();document.execCommand('insertHTML',false,'<hr/>');schedSave();};
+  document.querySelectorAll('.cpdot').forEach(d=>{
+    d.onclick=()=>{const n=S.notes.find(x=>x.id===S.activeId);if(n){n.color=d.dataset.c;persist();render();}};
+  });
+  document.getElementById('delbtn').onclick=()=>{
+    if(!confirm('Delete this note?'))return;
+    saveContent();S.notes=S.notes.filter(n=>n.id!==active.id);
+    S.activeId=S.notes.length?S.notes[0].id:null;persist();render();
+  };
+  window.onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();newNote();}};
+}
+
+function schedSave(){if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(saveContent,500);}
+
+function saveContent(){
+  if(!S.activeId)return;
+  const t=document.getElementById('ntitle');
+  const b=document.getElementById('eb');
+  if(!t||!b)return;
+  const n=S.notes.find(x=>x.id===S.activeId);if(!n)return;
+  n.title=t.value;n.content=b.innerHTML;n.updatedAt=Date.now();persist();
+}
+
+async function newNote(){
+  saveContent();
+  const id='n_'+Date.now();
+  S.notes.unshift({id,title:'',content:'',color:'',updatedAt:Date.now()});
+  S.activeId=id;persist();render();
+  setTimeout(()=>{const t=document.getElementById('ntitle');if(t)t.focus();},30);
+}
+
+function handlePaste(e){
+  const items=Array.from(e.clipboardData?.items||[]);
+  const img=items.find(i=>i.type.startsWith('image/'));
+  if(!img)return;
+  e.preventDefault();
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const image=new Image();
+    image.onload=()=>{
+      const c=document.createElement('canvas');
+      const MAX=900;let w=image.width,h=image.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+      if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+      c.width=w;c.height=h;
+      c.getContext('2d').drawImage(image,0,0,w,h);
+      document.execCommand('insertHTML',false,`<img src="${c.toDataURL('image/jpeg',.82)}"/>`);
+      schedSave();
+    };
+    image.src=ev.target.result;
+  };
+  reader.readAsDataURL(img.getAsFile());
+}
+
+function updTb(){
+  ['bold','italic','underline','strikeThrough'].forEach(cmd=>{
+    const el=document.querySelector(`[data-cmd="${cmd}"]`);
+    if(el)el.classList.toggle('on',document.queryCommandState(cmd));
+  });
+}
+
+async function init(){
+  const sess=lg('qn2:session');
+  if(sess){
+    const users=lg('qn:users')||{};
+    if(users[sess]){S.user=sess;S.notes=lg('qn2:notes:'+sess)||[];S.activeId=S.notes.length?S.notes[0].id:null;S.mode='main';}
+    else S.mode='auth';
+  }else S.mode='auth';
+  render();
+}
+init();
+</script>
+</body>
+</html>
