@@ -1056,7 +1056,6 @@ init();
 </html> -->
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2027,9 +2026,19 @@ function refreshSidebar(){
     return;
   }
 
-  // Remove stale separators — they have no id so can't be diffed, just remove and re-add
+  // Clear empty-state div if present (transition from zero notes to some notes)
+  nl.querySelectorAll('div:not(.nr):not(.nl-sep)').forEach(el=>el.remove());
+
+  // Remove stale separators — they have no id so can't be diffed
   nl.querySelectorAll('.nl-sep').forEach(el=>el.remove());
+
+  // Index existing DOM rows by note id
+  const existing=new Map();
   nl.querySelectorAll('.nr[data-id]').forEach(el=>existing.set(el.dataset.id,el));
+
+  // Update note count in sidebar header
+  const sbt=document.querySelector('.sbt');
+  if(sbt)sbt.innerHTML=`Notes <span style="font-weight:400;color:var(--mu)">(${S.notes.length})</span>`;
 
   // Build new child list, reusing existing elements where possible
   const fragment=document.createDocumentFragment();
@@ -2086,11 +2095,11 @@ async function silentReloadNotes(){
         const existing=S.notes.find(n=>n.id===fn.id);
         if(existing&&existing.share_mode&&!fn.share_mode)fn.share_mode=existing.share_mode;
       });
+      const prevCount=S.notes.length;
       S.notes=fresh;
       if(prevActive&&!fresh.find(n=>n.id===prevActive))S.activeId=fresh.length?fresh[0].id:null;
-      // If active note changed (deleted by someone else etc.) do full render
-      // Otherwise just refresh the sidebar to avoid editor flicker
-      if(S.activeId!==prevActive){
+      // Full render if active changed OR note count changed (new/deleted note)
+      if(S.activeId!==prevActive||fresh.length!==prevCount){
         render();
       }else{
         refreshSidebar();
