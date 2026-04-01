@@ -1055,7 +1055,6 @@ init();
 </body>
 </html> -->
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1657,7 +1656,7 @@ function renderMain(app){
       <div class="eh" style="border-left:3px solid ${bc};background:${tbg};">
         <input class="nti" id="ntitle" value="${esc(active.title)}" placeholder="Untitled note…" ${!canEdit?'readonly':''}/>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-          ${canEdit?`<button class="savebtn" id="savebtn">Save</button>`:''}
+          ${canEdit?`<button class="savebtn" id="savebtn">Saved</button>`:''}
           ${syncHtml}${shareCtrl}
           ${activeIsMine?`<div class="cpick">${cpHtml}</div><button class="delbtn" id="delbtn" title="Delete note">✕</button>`:''}
         </div>
@@ -2096,13 +2095,35 @@ async function silentReloadNotes(){
         if(existing&&existing.share_mode&&!fn.share_mode)fn.share_mode=existing.share_mode;
       });
       const prevCount=S.notes.length;
+      const prevActiveNote=S.notes.find(n=>n.id===prevActive);
       S.notes=fresh;
       if(prevActive&&!fresh.find(n=>n.id===prevActive))S.activeId=fresh.length?fresh[0].id:null;
-      // Full render if active changed OR note count changed (new/deleted note)
+      // Full render if active changed OR note count changed
       if(S.activeId!==prevActive||fresh.length!==prevCount){
         render();
       }else{
         refreshSidebar();
+        // Also patch editor content if active note was updated by someone else
+        const freshActive=fresh.find(n=>n.id===S.activeId);
+        if(freshActive&&prevActiveNote){
+          const isMine=!freshActive.owner_username||freshActive.owner_username===S.user;
+          // Only update editor if we're not the one who just saved
+          if(!isMine||Date.now()>suppressReloadUntil){
+            const eb=document.getElementById('eb');
+            const ntitle=document.getElementById('ntitle');
+            if(eb&&freshActive.content!==undefined&&eb.innerHTML!==freshActive.content){
+              // Save cursor position before update
+              const sel=window.getSelection();
+              const hadFocus=eb===document.activeElement;
+              eb.innerHTML=freshActive.content;
+              // Restore focus to end if editor had focus
+              if(hadFocus){eb.focus();const range=document.createRange();range.selectNodeContents(eb);range.collapse(false);sel.removeAllRanges();sel.addRange(range);}
+            }
+            if(ntitle&&freshActive.title!==undefined&&ntitle.value!==freshActive.title){
+              ntitle.value=freshActive.title;
+            }
+          }
+        }
       }
     }catch(e){console.warn('[SSE] reload failed',e);}
   },300);
