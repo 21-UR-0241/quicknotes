@@ -960,8 +960,8 @@ function refreshSidebar(){
     return;
   }
 
-  // Index existing DOM rows by note id
-  const existing=new Map();
+  // Remove stale separators — they have no id so can't be diffed, just remove and re-add
+  nl.querySelectorAll('.nl-sep').forEach(el=>el.remove());
   nl.querySelectorAll('.nr[data-id]').forEach(el=>existing.set(el.dataset.id,el));
 
   // Build new child list, reusing existing elements where possible
